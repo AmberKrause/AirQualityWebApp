@@ -2,24 +2,39 @@
 
 <!--
 	Emily Meuer
+	Amber Krause
 	03/14/2018
 
 	Air Quality Web App for CISC 375
 -->
 
-<html>
+<html ng-app="app">
 	<head>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		<link rel="stylesheet" href="style.css"/>
 
-<!--		<script src="angular.min.js"></script> -->
+		<!--	<script src="angular.min.js"></script> -->
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
-	<!--	<script type="text/javascript" src="airQuality.js"></script> -->
+		<script src="app.js"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9e5QbFsExSbAzJRtQbmwd_uhVGL8F_wg"></script>
+
+		<!--	<script type="text/javascript" src="airQuality.js"></script> -->
 		<title>Air Quality</title>
 	</head>
 
-	<body ng-app>
-		<p>How about {{5 + 5}}</p>
+	<body>
+		<div ng-controller="MapController">
+			<div id="map">
+			</div>
+			<input type="text" value="{{ latlng }}"></input>
+
+		</div>
+
 	</body>
+<!--<script>
+		function initialize() {
+			MapController.initMap();
+		}
+	</script>-->
 </html>
