@@ -14,10 +14,10 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		<link rel="stylesheet" href="style.css"/>
 
-		<!--	<script src="angular.min.js"></script> -->
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
-		<script src="app.js"></script>
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9e5QbFsExSbAzJRtQbmwd_uhVGL8F_wg&libraries=places"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="app.js"></script>
 
 		<!--	<script type="text/javascript" src="airQuality.js"></script> -->
 		<title>Air Quality</title>
@@ -25,7 +25,7 @@
 
 	<body>
 		<div ng-controller="MapController">
-			<input id="loc-input" class="controls" type="text"/>
+			<input id="loc-input" class="controls" type="text" ng-model="latlng"/>
 			<div id="map">
 			</div>
 

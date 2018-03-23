@@ -4,21 +4,18 @@
   var app = angular.module("app", []);
 
   app.controller("MapController", function($scope) {
-    var mapCont; //$scope
     var map; //Map object
     var input; //input text box
     var searchBox; //SearchBox object
 
-    mapCont = $scope;
-
     //initialize the map
-    mapCont.latlng = new google.maps.LatLng(45, -93);
+    $scope.latlng = new google.maps.LatLng(45, -93);
     map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
-      center: mapCont.latlng
+      center: $scope.latlng
     });
     input = document.getElementById("loc-input");
-    input.value = "(45, -93)";
+    //input.value = "(45, -93)";
 
     //add map control SearchBox
     searchBox = new google.maps.places.SearchBox(input);
@@ -56,9 +53,11 @@
 
 
 /*
-    map.addListener("center_changed", ()=> {
-      console.log("center changed");
+    map.addListener("drag", ()=> {
+      console.log("center changed: " + map.getCenter());
+      $scope.latlng = map.getCenter();
       //update search box input value
+      //how to do with data binding???
     });
 */
   });
