@@ -1,4 +1,29 @@
+/*
+    Amber Krause, Emily Meuer
+    March 2018
+
+    Air Quality Web App Assignment for Web Development
+*/
+
 #map {
   height: 400px;
   width: 400px;
+};
+
+table, td, th, tr {
+    background-color: #cccccc;
+    border-collapse: collapse;
 }
+
+tbody {
+    border-collapse: collapse;
+}
+
+.ng-scope {
+    border-collapse: collapse;
+}
+
+.ng-binding {
+    border: 1px solid #cccccc;
+    border-collapse: collapse;
+};

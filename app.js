@@ -3,15 +3,17 @@
 (function() {
   var app = angular.module("app", []);
 
+  // JSON object with Air Quality Data;
+  // initialized in the TableController function.
+  var aqData;
+
   app.controller("MapController", function($scope) {
     var map; //Map object
     var input; //input text box
     var searchBox; //SearchBox object
 
-    console.log("In the Map controller.");
-
     //initialize the map
-    $scope.latlng = new google.maps.LatLng(45, -93);
+    $scope.latlng = new google.maps.LatLng(45, -100);
     map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
       center: $scope.latlng
@@ -50,7 +52,6 @@
       });
       map.fitBounds(bounds);
     });
-
 /*
     map.addListener("drag", ()=> {
       console.log("center changed: " + map.getCenter());
@@ -58,16 +59,32 @@
       //update search box input value
       //how to do with data binding???
     });
-*/
+    */
 }); // MapController
 
 // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000
 app.controller("TableController", function($scope, $http) {
-    $http.get("https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000")
-    .then(function (response) { $scope.measurements = response.data.results; });
+
+    // Real URL:
+    // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=50000
+
+    // But for now, that data is at
+    // https://emilymeuer.github.io/AirQualityWebApp/measurements.json
+    // to avoid this error:
+    // "The 'Access-Control-Allow-Origin' header has a value 'null' that is not
+    // equal to the supplied origin. Origin 'null' is therefore not allowed access."
+    $http.get("https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=18.65,76.90&radius=500000")
+    .then(function (response) {
+        aqData              = response.data.results;
+        $scope.measurements = aqData;
+    });
 
     //console.log("$scope.measurements = " + $scope.measurements)
 }); // TableController
 
-
+/*
+function mapMoved() {
+    console.log("Map moved!");
+}
+*/
 })();
