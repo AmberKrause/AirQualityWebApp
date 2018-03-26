@@ -8,6 +8,8 @@
     var input; //input text box
     var searchBox; //SearchBox object
 
+    console.log("In the Map controller.");
+
     //initialize the map
     $scope.latlng = new google.maps.LatLng(45, -93);
     map = new google.maps.Map(document.getElementById("map"), {
@@ -49,9 +51,6 @@
       map.fitBounds(bounds);
     });
 
-
-
-
 /*
     map.addListener("drag", ()=> {
       console.log("center changed: " + map.getCenter());
@@ -60,6 +59,15 @@
       //how to do with data binding???
     });
 */
-  });
+}); // MapController
+
+// https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000
+app.controller("TableController", function($scope, $http) {
+    $http.get("https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000")
+    .then(function (response) { $scope.measurements = response.data.results; });
+
+    //console.log("$scope.measurements = " + $scope.measurements)
+}); // TableController
+
 
 })();
