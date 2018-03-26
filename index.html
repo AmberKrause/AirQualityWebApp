@@ -24,6 +24,7 @@
 	</head>
 
 	<body>
+		<!-- Map -->
 		<div ng-controller="MapController">
 			<input id="loc-input" class="controls" type="text" ng-model="latlng"/>
 			<div id="map">
@@ -31,6 +32,18 @@
 
 		</div>
 
+		<!-- Table -->
+
+<div ng-controller="TableController">
+		<table>
+			<tr ng-repeat="i in measurements">
+				<td>{{ i.parameter }}</td>
+				<td>{{ i.coordinates }}</td>
+				<td>{{ i.date }}</td>
+			</tr>
+
+		</table>
+</div>
 	</body>
 <!--<script>
 		function initialize() {
