@@ -13,6 +13,7 @@
     var searchBox; //SearchBox object
     var markerCluster; //controls markers and clustering
 
+
     //MAP INITIALIZATION START
 
     $scope.latlng = new google.maps.LatLng(45, -100);
@@ -60,11 +61,10 @@
         }
       });
       map.fitBounds(bounds);
+
     });//places_changed listener
 
     //SEARCHBOX END
-
-
 
 
 /*
@@ -74,6 +74,7 @@
       //update search box input value
       //how to do with data binding???
     });
+
 */
 
 
@@ -131,6 +132,7 @@ app.controller("TableController", function($scope, $http) {
 
         //notify MapController to update markers
         $scope.$parent.$broadcast("data-ready");
+
     });
 
     //console.log("$scope.measurements = " + $scope.measurements)
