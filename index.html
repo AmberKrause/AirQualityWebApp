@@ -15,6 +15,7 @@
 		<link rel="stylesheet" href="style.css"/>
 
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
+		<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
 		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9e5QbFsExSbAzJRtQbmwd_uhVGL8F_wg&libraries=places"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		<script src="app.js"></script>
@@ -34,12 +35,17 @@
 
 		<!-- Table -->
 
-<div ng-controller="TableController">
+<div id="aqDataTable" ng-controller="TableController">
 		<table>
+			<tr>
+				<th>Parameter:</th>
+				<th>Coordinates:</th>
+				<th>Date:</th>
+			</tr>
 			<tr ng-repeat="i in measurements">
 				<td>{{ i.parameter }}</td>
-				<td>{{ i.coordinates }}</td>
-				<td>{{ i.date }}</td>
+				<td class="tableData">({{ i.coordinates.latitude }}, {{ i.coordinates.longitude }})</td>
+				<td class="tableData">{{ i.date.utc | date : "short" }}</td>
 			</tr>
 
 		</table>
