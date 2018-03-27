@@ -130,6 +130,9 @@ app.controller("TableController", function($scope, $http) {
     .then(function (response) {
         aqData              = response.data.results;
         $scope.measurements = aqData;
+
+        //notify MapController to update markers
+        $scope.$parent.$broadcast("data-ready");
     });
 
     //console.log("$scope.measurements = " + $scope.measurements)
