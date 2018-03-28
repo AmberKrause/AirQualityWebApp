@@ -13,8 +13,10 @@
     var searchBox; //SearchBox object
     var markerCluster; //controls markers and clustering
 
+
     //MAP INITIALIZATION START
 
+    //initialize the map
     $scope.latlng = new google.maps.LatLng(45, -100);
     map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
@@ -60,11 +62,10 @@
         }
       });
       map.fitBounds(bounds);
+
     });//places_changed listener
 
     //SEARCHBOX END
-
-
 
 
 /*
@@ -74,6 +75,7 @@
       //update search box input value
       //how to do with data binding???
     });
+
 */
 
 
@@ -141,5 +143,4 @@ function mapMoved() {
     console.log("Map moved!");
 }
 */
-
 })();
