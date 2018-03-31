@@ -7,7 +7,7 @@
   // initialized in the TableController function.
   var aqData;
 
-  app.controller("MapController", function($scope) {
+  app.controller("MapController", function($rootScope, $scope) {
     var map; //Map object
     var input; //input text box
     var searchBox; //SearchBox object
@@ -18,10 +18,10 @@
     //MAP INITIALIZATION START
 
     //initialize the map
-    $scope.curLoc = new google.maps.LatLng(45, -100);
+    $rootScope.curLoc = new google.maps.LatLng(45, -100);
     map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
-      center: $scope.curLoc
+      center: $rootScope.curLoc
     });
 
     //MAP INITIALIZATION END
@@ -50,19 +50,19 @@
         return;
       }
 
-      var bounds = new google.maps.LatLngBounds();
+      $rootScope.bounds = new google.maps.LatLngBounds();
       places.forEach(function(place) {
         if(!place.geometry) {
           console.log("Returned place contains no geometry");
           return;
         }
         if(place.geometry.viewport) {
-          bounds.union(place.geometry.viewport);
+          $rootScope.bounds.union(place.geometry.viewport);
         } else {
-          bounds.extend(place.geometry.location);
+          $rootScope.bounds.extend(place.geometry.location);
         }
       });
-      map.fitBounds(bounds);
+      map.fitBounds($rootScope.bounds);
     });//places_changed listener
 
     //geocoder for location lookup
@@ -99,10 +99,10 @@
                 i = 0;
               } //else
 
-              $scope.curLoc = results[i].formatted_address;
+              $rootScope.curLoc = results[i].formatted_address;
           }
           else {
-            $scope.curLoc = map.getCenter();
+            $rootScope.curLoc = map.getCenter();
           }
           $scope.$apply();
       });//geocode
@@ -127,7 +127,7 @@
       //create array of markers
       var markers = aqData.map(function(measure, i) {
         var lat = aqData[i].coordinates.latitude;
-        console.log("TESTING: Latitude for marker:" + lat);
+        //console.log("TESTING: Latitude for marker:" + lat);
         var lon = aqData[i].coordinates.longitude;
         return new google.maps.Marker({
           position: new google.maps.LatLng(lat,lon),
@@ -137,7 +137,6 @@
 
       //add marker clusterer to manage the markers
       markerCluster = new MarkerClusterer(map, markers, {imagePath: "images/m"});
-
     } //updateMarkers
 
     $scope.$on("data-ready", function(event) {
@@ -147,34 +146,46 @@
 
     //MARKERS END
 
+    $rootScope.$broadcast("map-ready");
+
+    console.log("Should have broadcasted that map is ready...");
+
 }); // MapController
 
+
 // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000
-app.controller("TableController", function($scope, $http) {
+app.controller("TableController", function($rootScope, $scope, $http) {
+    console.log("We may not have yet received the broadcast, but we are in the TableController!");
 
-    // Real URL:
-    // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=50000
+    $scope.$on("map-ready", function(event) {
+        console.log("Received map-ready event: " + event);
+    }); // map-ready
 
-    // But for now, that data is at
-    // https://emilymeuer.github.io/AirQualityWebApp/measurements.json
-    // to avoid this error:
-    // "The 'Access-Control-Allow-Origin' header has a value 'null' that is not
-    // equal to the supplied origin. Origin 'null' is therefore not allowed access."
-    $http.get("https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=18.65,76.90&radius=500000")
-    .then(function (response) {
-        aqData              = response.data.results;
-        $scope.measurements = aqData;
+        // Real URL:
+        // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=50000
 
-        //notify MapController to update markers
-        $scope.$parent.$broadcast("data-ready");
-    });
+        // But for now, that data is at
+        // https://emilymeuer.github.io/AirQualityWebApp/measurements.json
+        // to avoid this error:
+        // "The 'Access-Control-Allow-Origin' header has a value 'null' that is not
+        // equal to the supplied origin. Origin 'null' is therefore not allowed access."
 
-    //console.log("$scope.measurements = " + $scope.measurements)
+        console.log("trying to get from https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.curLoc.lat() + "," + $rootScope.curLoc.lng() + "&radius=500000");
+
+        $http.get("https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.curLoc.lat() + "," + $rootScope.curLoc.lng() + "&radius=100000")
+        .then(function (response) {
+            aqData              = response.data.results;
+            $scope.measurements = aqData;
+
+            //notify MapController to update markers
+            $rootScope.$broadcast("data-ready");
+
+            if($rootScope.bounds != undefined) {
+                console.log("$rootScope.bounds.toSpan() = " + $rootScope.bounds.toSpan());
+            }
+        });
+
+
 }); // TableController
 
-/*
-function mapMoved() {
-    console.log("Map moved!");
-}
-*/
 })();
