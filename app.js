@@ -11,16 +11,17 @@
     var map; //Map object
     var input; //input text box
     var searchBox; //SearchBox object
+    var geocoder; //geocoder to get loc desc from coords
     var markerCluster; //controls markers and clustering
 
 
     //MAP INITIALIZATION START
 
     //initialize the map
-    $scope.latlng = new google.maps.LatLng(45, -100);
+    $scope.curLoc = new google.maps.LatLng(45, -100);
     map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
-      center: $scope.latlng
+      center: $scope.curLoc
     });
 
     //MAP INITIALIZATION END
@@ -62,21 +63,54 @@
         }
       });
       map.fitBounds(bounds);
-
     });//places_changed listener
+
+    //geocoder for location lookup
+    geocoder = new google.maps.Geocoder;
+
+    //update text when map is moved or zoom changed
+    map.addListener("dragend", updateSearchText);
+    map.addListener("zoom_changed", updateSearchText);
+
+    //update search text
+    function updateSearchText() {
+      var coords = map.getCenter().toJSON();
+
+      geocoder.geocode({'location': coords}, function(results, status) {
+          if(status === 'OK') {
+              if(map.zoom <= 5) {
+                //get country
+                for(var i = 0; results[i]; i++) {
+                  if(results[i].types.includes("country")) {
+                    break;
+                  }
+                }
+              } //if(map.zoom <= 5)
+              else if(map.zoom <= 12) {
+                //get city or township
+                for(var i = 0; results[i]; i++) {
+                  if(results[i].types.includes("political")) {
+                    break;
+                  }
+                }
+              } //else if(map.zoom <= 12)
+              else {
+                //get most specific address
+                i = 0;
+              } //else
+
+              $scope.curLoc = results[i].formatted_address;
+          }
+          else {
+            $scope.curLoc = map.getCenter();
+          }
+          $scope.$apply();
+      });//geocode
+    };//updateSearchText
 
     //SEARCHBOX END
 
 
-/*
-    map.addListener("drag", ()=> {
-      console.log("center changed: " + map.getCenter());
-      $scope.latlng = map.getCenter();
-      //update search box input value
-      //how to do with data binding???
-    });
-
-*/
 
 
     //MARKERS START
