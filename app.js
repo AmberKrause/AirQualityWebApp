@@ -19,9 +19,18 @@
 
     //initialize the map
     $rootScope.curLoc = new google.maps.LatLng(45, -100);
+    // Adding a specific latLng object, because curLoc gets overwritten with the
+    // address (which is definitely nicer to show in the searchBox):
+    $rootScope.latLng = $rootScope.curLoc;
     map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
       center: $rootScope.curLoc
+    });
+
+    // This ensures that the map will be fully loaded before we try to initialize map.bounds:
+    google.maps.event.addListener(map, "tilesloaded", () => {
+        $rootScope.bounds = map.getBounds();
+        console.log("  $rootScope.bounds = " + $rootScope.bounds);
     });
 
     //MAP INITIALIZATION END
@@ -74,7 +83,8 @@
 
     //update search text
     function updateSearchText() {
-      var coords = map.getCenter().toJSON();
+      $rootScope.latLng = map.getCenter();
+      var coords = $rootScope.latLng.toJSON();
 
       geocoder.geocode({'location': coords}, function(results, status) {
           if(status === 'OK') {
@@ -102,8 +112,12 @@
               $rootScope.curLoc = results[i].formatted_address;
           }
           else {
-            $rootScope.curLoc = map.getCenter();
+            $rootScope.curLoc = $rootScope.latLng;
           }
+
+          // Tells the TableController to update the data:
+          $rootScope.$broadcast("map-ready");
+
           $scope.$apply();
       });//geocode
     };//updateSearchText
@@ -146,9 +160,6 @@
 
     //MARKERS END
 
-    $rootScope.$broadcast("map-ready");
-
-    console.log("Should have broadcasted that map is ready...");
 
 }); // MapController
 
@@ -159,7 +170,6 @@ app.controller("TableController", function($rootScope, $scope, $http) {
 
     $scope.$on("map-ready", function(event) {
         console.log("Received map-ready event: " + event);
-    }); // map-ready
 
         // Real URL:
         // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=50000
@@ -170,9 +180,17 @@ app.controller("TableController", function($rootScope, $scope, $http) {
         // "The 'Access-Control-Allow-Origin' header has a value 'null' that is not
         // equal to the supplied origin. Origin 'null' is therefore not allowed access."
 
-        console.log("trying to get from https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.curLoc.lat() + "," + $rootScope.curLoc.lng() + "&radius=500000");
+        console.log("$rootScope.latLng = " + $rootScope.latLng);
+        console.log("trying to get from https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000));
 
-        $http.get("https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.curLoc.lat() + "," + $rootScope.curLoc.lng() + "&radius=100000")
+//        $http.get("https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.latLng.lat() + "," + $rootScope.latLng.lng() + "&radius=5000")
+
+            // The latitude span changes depending on distance from the equator,
+            // but longitude will be steady.
+            // 1 degree longitude = 111 km
+            console.log("($rootScope.bounds.toSpan().lng() / 2) * 111000 = " + (($rootScope.bounds.toSpan().lng() / 2) * 111000) + "m");
+
+        $http.get("https://api.openaq.org/v1/measurements?coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000))
         .then(function (response) {
             aqData              = response.data.results;
             $scope.measurements = aqData;
@@ -180,10 +198,13 @@ app.controller("TableController", function($rootScope, $scope, $http) {
             //notify MapController to update markers
             $rootScope.$broadcast("data-ready");
 
+            /*console.log("($rootScope.bounds.toSpan().lng() / 2) * 111000 = " + (($rootScope.bounds.toSpan().lng() / 2) * 111000) + "m");
             if($rootScope.bounds != undefined) {
                 console.log("$rootScope.bounds.toSpan() = " + $rootScope.bounds.toSpan());
-            }
+            }*/
         });
+    }); // map-ready
+
 
 
 }); // TableController
