@@ -139,15 +139,40 @@
       }
 
       //create array of markers
+/*old way that works for clustering but no info box
       var markers = aqData.map(function(measure, i) {
         var lat = aqData[i].coordinates.latitude;
-        //console.log("TESTING: Latitude for marker:" + lat);
         var lon = aqData[i].coordinates.longitude;
         return new google.maps.Marker({
           position: new google.maps.LatLng(lat,lon),
           label: labels[i % labels.length]
         });
       });
+*/
+
+/*new way including info box*/
+      var markers = aqData.map(function(measure, i) {
+        var lat = aqData[i].coordinates.latitude;
+        var lon = aqData[i].coordinates.longitude;
+        var marker = new google.maps.Marker({
+          position: new google.maps.LatLng(lat,lon),
+          label: labels[i % labels.length]
+        });
+        var infowindow = new google.maps.InfoWindow({
+          content: "<div>" + aqData[i].parameter + ": " + aqData[i].value + aqData[i].unit + "</div>"
+        });
+        marker.addListener('mouseover', function() {
+          infowindow.open(map, marker);
+        });
+        marker.addListener('mouseout', function() {
+          infowindow.close();
+        });
+        return marker;
+      });
+/*new way including info box*/
+
+
+
 
       //add marker clusterer to manage the markers
       markerCluster = new MarkerClusterer(map, markers, {imagePath: "images/m"});
