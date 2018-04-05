@@ -151,6 +151,7 @@
 */
 
 /*new way including info box*/
+var infowindow = new google.maps.InfoWindow();
       var markers = aqData.map(function(measure, i) {
         var lat = aqData[i].coordinates.latitude;
         var lon = aqData[i].coordinates.longitude;
@@ -158,15 +159,14 @@
           position: new google.maps.LatLng(lat,lon),
           label: labels[i % labels.length]
         });
-        var infowindow = new google.maps.InfoWindow({
-          content: aqData[i].parameter + ": " + aqData[i].value + aqData[i].unit
-        });
         marker.addListener('mouseover', function() {
+          infowindow.setContent(aqData[i].parameter + ": " + aqData[i].value + aqData[i].unit);
           infowindow.open(map, marker);
           console.log("opened info box");
         });
         marker.addListener('mouseout', function() {
           infowindow.close();
+          console.log("closed info box");
         });
         return marker;
       });
