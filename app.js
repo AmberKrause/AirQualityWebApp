@@ -163,6 +163,10 @@
 
     //MARKERS END
 
+    // START HEATMAP
+
+    // HEATMAP END
+
 
 }); // MapController
 
@@ -183,8 +187,7 @@ app.controller("TableController", function($rootScope, $scope, $http) {
         // "The 'Access-Control-Allow-Origin' header has a value 'null' that is not
         // equal to the supplied origin. Origin 'null' is therefore not allowed access."
 
-        console.log("$rootScope.latLng = " + $rootScope.latLng);
-        console.log("trying to get from https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000));
+    //    console.log("trying to get from https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000));
 
 //        $http.get("https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.latLng.lat() + "," + $rootScope.latLng.lng() + "&radius=5000")
 
@@ -207,6 +210,8 @@ app.controller("TableController", function($rootScope, $scope, $http) {
             if($rootScope.bounds != undefined) {
                 console.log("$rootScope.bounds.toSpan() = " + $rootScope.bounds.toSpan());
             }*/
+        }, function (response) {
+            console.log("Uh-oh, caught an http error! response = " + response);
         });
     }); // map-ready
 
