@@ -18,7 +18,7 @@
     //MAP INITIALIZATION START
 
     //initialize the map
-    $rootScope.curLoc = new google.maps.LatLng(45, -100);
+    $rootScope.curLoc = new google.maps.LatLng(43, -120);
     // Adding a specific latLng object, because curLoc gets overwritten with the
     // address (which is definitely nicer to show in the searchBox):
     $rootScope.latLng = $rootScope.curLoc;
@@ -31,6 +31,9 @@
     google.maps.event.addListener(map, "tilesloaded", () => {
         $rootScope.bounds = map.getBounds();
         console.log("  $rootScope.bounds = " + $rootScope.bounds);
+
+        // Tells the TableController to update the data:
+        $rootScope.$broadcast("map-ready");
     });
 
     //MAP INITIALIZATION END
@@ -189,6 +192,8 @@ app.controller("TableController", function($rootScope, $scope, $http) {
             // but longitude will be steady.
             // 1 degree longitude = 111 km
             console.log("($rootScope.bounds.toSpan().lng() / 2) * 111000 = " + (($rootScope.bounds.toSpan().lng() / 2) * 111000) + "m");
+
+        console.log("test: $rootScope.latLng.toUrlValue() = " + $rootScope.latLng.toUrlValue());
 
         $http.get("https://api.openaq.org/v1/measurements?coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000))
         .then(function (response) {
