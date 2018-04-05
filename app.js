@@ -205,8 +205,18 @@ app.controller("TableController", function($rootScope, $scope, $http) {
 
 }); // TableController
 
-app.controller("FilterController", function($scope) {
-
+app.controller("FilterController", function($scope, $http) {
+    $scope.$on("map-ready", function(event) {
+        $http.get("https://api.openaq.org/v1/parameters")
+        .then(function (response) {
+            $scope.parameters   = response.data.results;
+/*
+            $rootScope.$broadcast("data-ready");
+*/
+        }, function (response) {
+            console.log("Caught an http error; response = " + response);
+        });
+    }); // map-ready
 }); // FilterController
 
 })();
