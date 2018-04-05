@@ -16,8 +16,7 @@
 
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.js"></script>
 		<script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
-		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9e5QbFsExSbAzJRtQbmwd_uhVGL8F_wg&libraries=places"></script>
-		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9e5QbFsExSbAzJRtQbmwd_uhVGL8F_wg&libraries=visualization"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA9e5QbFsExSbAzJRtQbmwd_uhVGL8F_wg&libraries=places,visualization"></script>
 		<script src="app.js"></script>
 
 		<!--	<script type="text/javascript" src="airQuality.js"></script> -->
@@ -26,15 +25,22 @@
 
 	<body>
 		<!-- Map -->
-		<div ng-controller="MapController">
+		<span ng-controller="MapController">
 			<input id="loc-input" class="controls" type="text" ng-model="curLoc"/>
 			<div id="map">
 			</div>
 
-		</div>
+		</span>
+
+		<!-- Filter Controls -->
+		<span id="filter">
+			<p>Filter Controls:</p>
+				<span ng-controller="FilterController">
+
+				</span>
+		</span>
 
 		<!-- Table -->
-
 <div id="aqDataTable" ng-controller="TableController">
 		<table>
 			<tr>

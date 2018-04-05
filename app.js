@@ -5,10 +5,12 @@
 
   // JSON object with Air Quality Data;
   // initialized in the TableController function.
-  var aqData;
 
   app.controller("MapController", function($rootScope, $scope) {
     var map; //Map object
+    var heatmap; // Heatmap object
+    var heatmapData;    // data for Heatmap object
+    var gradient;   // colors for Heatmap object
     var input; //input text box
     var searchBox; //SearchBox object
     var geocoder; //geocoder to get loc desc from coords
@@ -30,7 +32,6 @@
     // This ensures that the map will be fully loaded before we try to initialize map.bounds:
     google.maps.event.addListener(map, "tilesloaded", () => {
         $rootScope.bounds = map.getBounds();
-        console.log("  $rootScope.bounds = " + $rootScope.bounds);
 
         // Tells the TableController to update the data:
         $rootScope.$broadcast("map-ready");
@@ -38,7 +39,8 @@
 
     //MAP INITIALIZATION END
 
-
+    // For heatmap:
+    heatmapData  = [];
 
 
     //SEARCHBOX START
@@ -128,8 +130,6 @@
     //SEARCHBOX END
 
 
-
-
     //MARKERS START
 
     function updateMarkers() {
@@ -142,10 +142,10 @@
       }
 
       //create array of markers
-      var markers = aqData.map(function(measure, i) {
-        var lat = aqData[i].coordinates.latitude;
+      var markers = $rootScope.measurements.map(function(measure, i) {
+        var lat = $rootScope.measurements[i].coordinates.latitude;
         //console.log("TESTING: Latitude for marker:" + lat);
-        var lon = aqData[i].coordinates.longitude;
+        var lon = $rootScope.measurements[i].coordinates.longitude;
         return new google.maps.Marker({
           position: new google.maps.LatLng(lat,lon),
           label: labels[i % labels.length]
@@ -159,64 +159,54 @@
     $scope.$on("data-ready", function(event) {
       //console.log("TESTING: inside receiver");
       updateMarkers();
+      updateHeatmap();
     });
 
     //MARKERS END
 
-    // START HEATMAP
+
+    // HEATMAP START
+
+    function updateHeatmap() {
+        angular.forEach($rootScope.measurements, function(value, key) {
+            heatmapData[key] = new google.maps.LatLng(value.coordinates.latitude, value.coordinates.longitude);
+        });
+
+        heatmap  = new google.maps.visualization.HeatmapLayer({
+            data: heatmapData
+        });
+        heatmap.setMap(map);
+    } // updateHeatmap
 
     // HEATMAP END
-
 
 }); // MapController
 
 
 // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000
 app.controller("TableController", function($rootScope, $scope, $http) {
-    console.log("We may not have yet received the broadcast, but we are in the TableController!");
 
     $scope.$on("map-ready", function(event) {
-        console.log("Received map-ready event: " + event);
-
-        // Real URL:
-        // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=50000
-
-        // But for now, that data is at
-        // https://emilymeuer.github.io/AirQualityWebApp/measurements.json
-        // to avoid this error:
-        // "The 'Access-Control-Allow-Origin' header has a value 'null' that is not
-        // equal to the supplied origin. Origin 'null' is therefore not allowed access."
-
-    //    console.log("trying to get from https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000));
-
-//        $http.get("https://emilymeuer.github.io/AirQualityWebApp/measurements.json?coordinates=" + $rootScope.latLng.lat() + "," + $rootScope.latLng.lng() + "&radius=5000")
-
             // The latitude span changes depending on distance from the equator,
             // but longitude will be steady.
             // 1 degree longitude = 111 km
-            console.log("($rootScope.bounds.toSpan().lng() / 2) * 111000 = " + (($rootScope.bounds.toSpan().lng() / 2) * 111000) + "m");
-
-        console.log("test: $rootScope.latLng.toUrlValue() = " + $rootScope.latLng.toUrlValue());
 
         $http.get("https://api.openaq.org/v1/measurements?coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000))
         .then(function (response) {
-            aqData              = response.data.results;
-            $scope.measurements = aqData;
+            $rootScope.measurements   = response.data.results;
 
-            //notify MapController to update markers
+            //notify MapController to update markers and heatmap
             $rootScope.$broadcast("data-ready");
 
-            /*console.log("($rootScope.bounds.toSpan().lng() / 2) * 111000 = " + (($rootScope.bounds.toSpan().lng() / 2) * 111000) + "m");
-            if($rootScope.bounds != undefined) {
-                console.log("$rootScope.bounds.toSpan() = " + $rootScope.bounds.toSpan());
-            }*/
         }, function (response) {
-            console.log("Uh-oh, caught an http error! response = " + response);
+            console.log("Caught an http error; response = " + response);
         });
     }); // map-ready
 
-
-
 }); // TableController
+
+app.controller("FilterController", function($scope) {
+
+}); // FilterController
 
 })();
