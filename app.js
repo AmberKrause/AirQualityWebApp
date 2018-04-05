@@ -159,10 +159,11 @@
           label: labels[i % labels.length]
         });
         var infowindow = new google.maps.InfoWindow({
-          content: "<div>" + aqData[i].parameter + ": " + aqData[i].value + aqData[i].unit + "</div>"
+          content: aqData[i].parameter + ": " + aqData[i].value + aqData[i].unit
         });
         marker.addListener('mouseover', function() {
           infowindow.open(map, marker);
+          console.log("opened info box");
         });
         marker.addListener('mouseout', function() {
           infowindow.close();
