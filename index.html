@@ -36,7 +36,7 @@
 		<span id="filter">
 			<p>Filter Controls:</p>
 				<span ng-controller="FilterController">
-					<div ng-repeat="i in parameters">
+					<div ng-repeat="i in parameters" class={{i.id}} >
 						<input id={{i.id}} name={{i.id}} type="checkbox" checked>{{ i.name }}<br>
 					</div>
 					<div>
@@ -54,8 +54,8 @@
 				<th>Coordinates:</th>
 				<th>Date:</th>
 			</tr>
-			<tr ng-repeat="i in measurements">
-				<td>{{ i.parameter }}</td>
+			<tr ng-repeat="i in measurements" class={{i.parameter}}>
+				<td >{{ i.parameter }}</td>
 				<td>{{ i.value }}</td>
 				<td>({{ i.coordinates.latitude }}, {{ i.coordinates.longitude }})</td>
 				<td>{{ i.date.utc | date : "short" }}</td>

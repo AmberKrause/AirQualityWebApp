@@ -33,7 +33,7 @@ html {
 }
 
 table, td, th, tr {
-  background-color: #cccccc;
+  /*background-color: #ffccff;*/
   border-collapse: collapse;
   border: 1px solid black;
 }
@@ -61,9 +61,37 @@ p {
   height: 120px;
   width: 120px;
   margin: 20px;
-};
+}
 
 .container {
   width: 100%;
   overflow: auto;
-};
+}
+
+.bc {
+    background-color: red;
+}
+
+.co {
+    background-color: orange;
+}
+
+.no2 {
+    background-color: yellow;
+}
+
+.o3 {
+    background-color: teal;
+}
+
+.pm10 {
+    background-color: green;
+}
+
+.pm25 {
+    background-color: blue;
+}
+
+.so2 {
+    background-color: purple;
+}
