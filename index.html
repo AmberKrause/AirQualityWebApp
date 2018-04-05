@@ -36,8 +36,11 @@
 		<span id="filter">
 			<p>Filter Controls:</p>
 				<span ng-controller="FilterController">
-					<div ng-repeat="i in parameters" id="{{i.id}}")>
-						<input id={{i.id}} name={{i.id}} type="checkbox">{{ i.name }}<br>
+					<div ng-repeat="i in parameters">
+						<input id={{i.id}} name={{i.id}} type="checkbox" checked>{{ i.name }}<br>
+					</div>
+					<div>
+						<input id="filterButton" type="button" value="Filter" ng-click="clicked()">
 					</div>
 				</span>
 		</span>
@@ -47,13 +50,15 @@
 		<table>
 			<tr>
 				<th>Parameter:</th>
+				<th>Value:</th>
 				<th>Coordinates:</th>
 				<th>Date:</th>
 			</tr>
 			<tr ng-repeat="i in measurements">
 				<td>{{ i.parameter }}</td>
-				<td class="tableData">({{ i.coordinates.latitude }}, {{ i.coordinates.longitude }})</td>
-				<td class="tableData">{{ i.date.utc | date : "short" }}</td>
+				<td>{{ i.value }}</td>
+				<td>({{ i.coordinates.latitude }}, {{ i.coordinates.longitude }})</td>
+				<td>{{ i.date.utc | date : "short" }}</td>
 			</tr>
 
 		</table>

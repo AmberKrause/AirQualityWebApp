@@ -20,12 +20,12 @@
     //MAP INITIALIZATION START
 
     //initialize the map
-    $rootScope.curLoc = new google.maps.LatLng(43, -120);
+    $rootScope.curLoc = new google.maps.LatLng(43, -100);
     // Adding a specific latLng object, because curLoc gets overwritten with the
     // address (which is definitely nicer to show in the searchBox):
     $rootScope.latLng = $rootScope.curLoc;
     map = new google.maps.Map(document.getElementById("map"), {
-      zoom: 4,
+      zoom: 6,
       center: $rootScope.curLoc
     });
 
@@ -186,7 +186,8 @@
 // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000
 app.controller("TableController", function($rootScope, $scope, $http) {
 
-    $scope.$on("map-ready", function(event) {
+    // Filter waits for Map, Table waits for Filter Parameters:
+    $scope.$on("parameters-ready", function(event) {
             // The latitude span changes depending on distance from the equator,
             // but longitude will be steady.
             // 1 degree longitude = 111 km
@@ -199,17 +200,26 @@ app.controller("TableController", function($rootScope, $scope, $http) {
             $rootScope.$broadcast("data-ready");
 
         }, function (response) {
-            console.log("Caught an http error; response = " + response);
+            console.log("Caught an http error while filling the table; response = " + response);
         });
     }); // map-ready
 
 }); // TableController
 
-app.controller("FilterController", function($scope, $http) {
+app.controller("FilterController", function($rootScope, $scope, $http) {
+    $rootScope.curParameters   = [];
+
+    // Filter waits for Map, Table waits for Filter Parameters:
     $scope.$on("map-ready", function(event) {
         $http.get("https://api.openaq.org/v1/parameters")
         .then(function (response) {
             $scope.parameters   = response.data.results;
+
+            $scope.parameters.forEach(function(param, key) {
+                $rootScope.curParameters[key]  = param;
+            });
+
+            $rootScope.$broadcast("parameters-ready");
 /*
             $rootScope.$broadcast("data-ready");
 */
@@ -217,6 +227,30 @@ app.controller("FilterController", function($scope, $http) {
             console.log("Caught an http error; response = " + response);
         });
     }); // map-ready
+
+    $scope.clicked = function() {
+        var curElement;
+
+        $rootScope.curParameters   = [];
+
+        $scope.parameters.forEach(function(param) {
+            console.log("param.id = " + param.id);
+            curElement  = document.getElementById(param.id);
+            if(curElement.checked) {
+                console.log(curElement + " is checked!");
+
+                $rootScope.curParameters.push(param.id);
+            } else {
+                console.log(curElement + " is not checked.");
+            }
+        });
+
+        $rootScope.curParameters.forEach(function(param) {
+            console.log("curParameters includes " + param);
+        });
+
+        $rootScope.$broadcast("parameters-ready");
+    } // clicked
 }); // FilterController
 
 })();
