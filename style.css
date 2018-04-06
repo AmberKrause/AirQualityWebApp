@@ -72,6 +72,10 @@ p {
     width: 100%;
 }
 
+#footer {
+    float: left;
+}
+
 .bold {
     font-weight: bold;
 }

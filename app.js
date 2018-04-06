@@ -166,11 +166,11 @@ var infowindow = new google.maps.InfoWindow();
         marker.addListener('mouseover', function() {
           infowindow.setContent($rootScope.measurements[i].parameter + ": " + $rootScope.measurements[i].value + $rootScope.measurements[i].unit);
           infowindow.open(map, marker);
-          console.log("opened info box");
+          //console.log("opened info box");
         });
         marker.addListener('mouseout', function() {
           infowindow.close();
-          console.log("closed info box");
+          //console.log("closed info box");
         });
         return marker;
       });
@@ -185,9 +185,7 @@ var infowindow = new google.maps.InfoWindow();
 
     // map-ready => parameters-ready => data-ready:
     $scope.$on("data-ready", function(event) {
-      //console.log("TESTING: inside receiver");
       updateMarkers();
-      console.log("data-ready: $rootScope.curParameters.length = " + $rootScope.curParameters.length);
       if($rootScope.curParameters.length == 1) {
           updateHeatmap();
       }
@@ -199,6 +197,21 @@ var infowindow = new google.maps.InfoWindow();
     // HEATMAP START
 
     function updateHeatmap() {
+        var gradient = [
+          "rgb(255, 155, 47)",
+          "rgb(247, 143, 55)",
+          "rgb(238, 130, 63)",
+          "rgb(230, 118, 72)",
+          "rgb(221, 105, 80)",
+          "rgb(213, 93, 88)",
+          "rgb(205, 81, 96)",
+          "rgb(196, 68, 105)",
+          "rgb(188, 56, 113)",
+          "rgb(179, 43, 121)",
+          "rgb(171, 31, 129)",
+          "rgb(150, 0, 150)"
+      ];
+
         angular.forEach($rootScope.measurements, function(value, key) {
             heatmapData[key] = new google.maps.LatLng(value.coordinates.latitude, value.coordinates.longitude);
         });
@@ -207,6 +220,8 @@ var infowindow = new google.maps.InfoWindow();
             data: heatmapData
         });
         heatmap.setMap(map);
+        heatmap.set('gradient', gradient);
+
     } // updateHeatmap
 
     // HEATMAP END
@@ -235,6 +250,18 @@ app.controller("TableController", function($rootScope, $scope, $http) {
                 .then(function (response) {
                     $rootScope.measurements   = response.data.results;
 
+                    console.log("    ---- Still checking parameters for slider compare? Checking pm10 against " + $rootScope.sliderVals.pm10);
+
+                    $rootScope.measurements.forEach(function(measurement, key) {
+                        ///console.log( key + ": measurement.parameter = " + measurement.parameter + "; measurement.value = " + measurement.value + "; $rootScope.sliderVals[measurement.parameter] = " + $rootScope.sliderVals[measurement.parameter]);
+                        if(measurement.value < $rootScope.sliderVals[measurement.parameter]) {
+                            //console.log("About to remove " + measurement.parameter + " with measure " + measurement.value);
+                            $rootScope.measurements.splice(key, 1);
+                        } /*else {
+                            console.log("Keeping in " + measurement.parameter + " with measure " + measurement.value);
+                        }*/
+                    });
+
                     //notify MapController to update markers and heatmap
                     $rootScope.$broadcast("data-ready");
                 }, function (response) {
@@ -248,17 +275,34 @@ app.controller("TableController", function($rootScope, $scope, $http) {
 }); // TableController
 
 app.controller("FilterController", function($rootScope, $scope, $http, $document) {
-    $rootScope.curParameters   = [];
-
+    $rootScope.curParameters    = [];
+    $rootScope.sliderVals       = {
+        "bc" : 0,
+        "co" : 0,
+        "no2" : 0,
+        "o3" : 0,
+        "pm10" : 0,
+        "pm25" : 0,
+        "so2" : 0
+    };
+    $scope.maxSliderVals    = {
+        "bc" : 100,
+        "co" : 1,
+        "no2" : 1,
+        "o3" : 1,
+        "pm10" : 100,
+        "pm25" : 100,
+        "so2" : 1
+    };
 
     // Just gets the parameters the first time (they are constants):
-    if($scope.parameters === undefined) {
-    console.log("map = " + map);
+    if($rootScope.parameters === undefined) {
             $http.get("https://api.openaq.org/v1/parameters")
             .then(function (response) {
-                $scope.parameters   = response.data.results;
+                $rootScope.parameters   = response.data.results;
 
-                $scope.parameters.forEach(function(param, key) {
+                $rootScope.parameters.forEach(function(param, key) {
+                    $rootScope.parameters[key] = param.id;
                     $rootScope.curParameters[key]  = param.id;
                 });
 
@@ -281,17 +325,17 @@ app.controller("FilterController", function($rootScope, $scope, $http, $document
         // The first time through, it sometimes tries to do this before window.onload
         // has happened and initialized paramters, so we check to see if this
         // var has been initialized and just skip it if not (it will get called again).
-        if($scope.parameters != undefined) {
+        if($rootScope.parameters != undefined) {
             $rootScope.curParameters   = [];
 
-            $scope.parameters.forEach(function(param) {
-                if(document.getElementById(param.id).checked) {
-                    $rootScope.curParameters.push(param.id);
+            $rootScope.parameters.forEach(function(param) {
+                if(document.getElementById(param).checked) {
+                    $rootScope.curParameters.push(param);
                 }
             });
 
             $rootScope.$broadcast("parameters-ready");
-        } // $scope.parameters != undefined
+        } // $rootScope.parameters != undefined
     } // clicked
 }); // FilterController
 
