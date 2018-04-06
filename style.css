@@ -13,15 +13,25 @@ html {
 #map {
     height: 400px;
     width: 500px;
+    position: relative;
+    float: left;
+    clear: left;
 }
 
 #filter {
     width: 20rem;
-/*    clear: left;*/
+    clear: right;
     float: left;
     margin: 2rem;
     padding: .5rem;
     border: 1px solid black;
+    position: relative;
+}
+
+#aqDataTable {
+    float: left;
+    clear: left;
+    margin: 2rem;
 }
 
 #bc {
@@ -56,6 +66,20 @@ p {
   border-collapse: collapse;
 }
 */
+#floatRight {
+    float: right;
+    text-align: right;
+    width: 100%;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.italic {
+    font-style: italic;
+}
+
 .profile-pic {
   border: 4px solid black;
   height: 120px;
@@ -66,6 +90,23 @@ p {
 .container {
   width: 100%;
   overflow: auto;
+}
+
+
+.filterParamContainer {
+    /*width: 200px;*/
+    position: relative;
+}
+
+.slider {
+    float: right;
+    /*left: 50px;*/
+}
+
+.text {
+    float: right;
+    width: 3rem;
+    text-align: center;
 }
 
 .bc {

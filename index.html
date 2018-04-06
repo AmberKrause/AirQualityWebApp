@@ -24,45 +24,50 @@
 	</head>
 
 	<body>
-		<!-- Map -->
-		<span ng-controller="MapController">
-			<input id="loc-input" class="controls" type="text" ng-model="curLoc"/>
-			<div id="map">
-			</div>
 
-		</span>
-
-		<!-- Filter Controls -->
-		<span id="filter">
-			<p>Filter Controls:</p>
-				<span ng-controller="FilterController">
-					<div ng-repeat="i in parameters" class={{i.id}} >
-						<input id={{i.id}} name={{i.id}} type="checkbox" checked>{{ i.name }}<br>
-					</div>
-					<div>
-						<input id="filterButton" type="button" value="Filter" ng-click="clicked()">
-					</div>
+		<div id="container">
+			<!-- Map -->
+			<span ng-controller="MapController">
+				<input id="loc-input" class="controls" type="text" ng-model="curLoc"/>
+				<span id="map">
 				</span>
-		</span>
+			</span>
 
-		<!-- Table -->
-<div id="aqDataTable" ng-controller="TableController">
-		<table>
-			<tr>
-				<th>Parameter:</th>
-				<th>Value:</th>
-				<th>Coordinates:</th>
-				<th>Date:</th>
-			</tr>
-			<tr ng-repeat="i in measurements" class={{i.parameter}}>
-				<td >{{ i.parameter }}</td>
-				<td>{{ i.value }}</td>
-				<td>({{ i.coordinates.latitude }}, {{ i.coordinates.longitude }})</td>
-				<td>{{ i.date.utc | date : "short" }}</td>
-			</tr>
+			<!-- Filter Controls -->
+			<span id="filter">
+				<p class="bold">Filter Controls:</p>
+				<p id="floatRight">Only show measurements above:</p>
+					<div ng-controller="FilterController" ng-init="initParams" class="filterParamContainer">
+						<div ng-repeat="i in parameters" class={{i.id}}>
+							<input id={{i.id}} name={{i.id}} type="checkbox" checked> {{ i.name }}
+							<span id={{i.id+"text"}} class="text"> {{ allText }}</span>
+							<input id={{i.id+"slider"}} type="range" min="0" max="100" value="0" class="slider" ng-model="allText">
+						</div>
+						<div>
+							<input id="filterButton" type="button" value="Filter" ng-click="updateParameters()">
+						</div>
+					</div>
+			</span>
 
-		</table>
-</div>
+			<!-- Table -->
+			<div id="aqDataTable" ng-controller="TableController">
+					<table>
+						<tr>
+							<th>Parameter:</th>
+							<th>Value:</th>
+							<th>Coordinates:</th>
+							<th>Date:</th>
+						</tr>
+						<tr ng-repeat="i in measurements" class={{i.parameter}}>
+							<td >{{ i.parameter }}</td>
+							<td>{{ i.value }}</td>
+							<td>({{ i.coordinates.latitude }}, {{ i.coordinates.longitude }})</td>
+							<td>{{ i.date.utc | date : "short" }}</td>
+						</tr>
+
+					</table>
+			</div>
+		</div>
 	</body>
 <!--<script>
 		function initialize() {

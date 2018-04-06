@@ -3,6 +3,8 @@
 (function() {
   var app = angular.module("app", []);
 
+  console.log("Can I just do something here?");
+
   // JSON object with Air Quality Data;
   // initialized in the TableController function.
 
@@ -35,6 +37,7 @@
 
         // Tells the TableController to update the data:
         $rootScope.$broadcast("map-ready");
+        console.log("Just broadcasted that the map is ready.");
     });
 
     //MAP INITIALIZATION END
@@ -121,7 +124,7 @@
           }
 
           // Tells the TableController to update the data:
-          $rootScope.$broadcast("map-ready");
+    //      $rootScope.$broadcast("map-ready");
 
           $scope.$apply();
       });//geocode
@@ -156,10 +159,14 @@
       markerCluster = new MarkerClusterer(map, markers, {imagePath: "images/m"});
     } //updateMarkers
 
+    // map-ready => parameters-ready => data-ready:
     $scope.$on("data-ready", function(event) {
       //console.log("TESTING: inside receiver");
       updateMarkers();
-      updateHeatmap();
+      console.log("data-ready: $rootScope.curParameters.length = " + $rootScope.curParameters.length);
+      if($rootScope.curParameters.length == 1) {
+          updateHeatmap();
+      }
     });
 
     //MARKERS END
@@ -186,70 +193,80 @@
 // https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000
 app.controller("TableController", function($rootScope, $scope, $http) {
 
-    // Filter waits for Map, Table waits for Filter Parameters:
+    // Filter Parameters wait for Map, Table waits for Filter Parameters:
     $scope.$on("parameters-ready", function(event) {
             // The latitude span changes depending on distance from the equator,
             // but longitude will be steady.
             // 1 degree longitude = 111 km
 
-        $http.get("https://api.openaq.org/v1/measurements?coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000))
-        .then(function (response) {
-            $rootScope.measurements   = response.data.results;
+            var parameterString = "parameter=";
+            $rootScope.curParameters.forEach(function(param, key){
+                    parameterString = parameterString + param + "&parameter=";
+            });
+            parameterString = parameterString.substring(0, (parameterString.length - 11));
 
-            //notify MapController to update markers and heatmap
-            $rootScope.$broadcast("data-ready");
+            if($rootScope.bounds != undefined) {
+                console.log("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000));
+                $http.get("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000))
+                .then(function (response) {
+                    $rootScope.measurements   = response.data.results;
 
-        }, function (response) {
-            console.log("Caught an http error while filling the table; response = " + response);
-        });
-    }); // map-ready
+                    //notify MapController to update markers and heatmap
+                    $rootScope.$broadcast("data-ready");
+                }, function (response) {
+                    console.log("Caught an http error while filling the table; response = " + response);
+                });
+            } else {
+                console.log("TableController.on parameters-ready: map bounds are undefined; did not load table data.");
+            }
+    }); // parameters ready
 
 }); // TableController
 
-app.controller("FilterController", function($rootScope, $scope, $http) {
+app.controller("FilterController", function($rootScope, $scope, $http, $document) {
     $rootScope.curParameters   = [];
 
-    // Filter waits for Map, Table waits for Filter Parameters:
-    $scope.$on("map-ready", function(event) {
-        $http.get("https://api.openaq.org/v1/parameters")
-        .then(function (response) {
-            $scope.parameters   = response.data.results;
+    // Just gets the parameters the first time (they are constants):
+    if($scope.parameters === undefined) {
+    console.log("map = " + map);
+            $http.get("https://api.openaq.org/v1/parameters")
+            .then(function (response) {
+                $scope.parameters   = response.data.results;
 
-            $scope.parameters.forEach(function(param, key) {
-                $rootScope.curParameters[key]  = param;
+                $scope.parameters.forEach(function(param, key) {
+                    $rootScope.curParameters[key]  = param.id;
+                });
+
+                $rootScope.$broadcast("parameters-ready");
+            }, function (response) {
+                console.log("Caught an http error while trying to load parameters; response = " + response);
+            });
+//        }); // map-ready
+    } // if / listen for tilesloaded
+
+    // Filter Parameters waits for Map, Table waits for Filter Parameters:
+    $scope.$on("map-ready", function(event) {
+            $scope.updateParameters();
+    }); // map-ready
+
+    // updateParameters is its own function (not just in "map-ready")
+    // so that it can be called by the Filter button.
+    $scope.updateParameters = function() {
+
+        // The first time through, it sometimes tries to do this before window.onload
+        // has happened and initialized paramters, so we check to see if this
+        // var has been initialized and just skip it if not (it will get called again).
+        if($scope.parameters != undefined) {
+            $rootScope.curParameters   = [];
+
+            $scope.parameters.forEach(function(param) {
+                if(document.getElementById(param.id).checked) {
+                    $rootScope.curParameters.push(param.id);
+                }
             });
 
             $rootScope.$broadcast("parameters-ready");
-/*
-            $rootScope.$broadcast("data-ready");
-*/
-        }, function (response) {
-            console.log("Caught an http error; response = " + response);
-        });
-    }); // map-ready
-
-    $scope.clicked = function() {
-        var curElement;
-
-        $rootScope.curParameters   = [];
-
-        $scope.parameters.forEach(function(param) {
-            console.log("param.id = " + param.id);
-            curElement  = document.getElementById(param.id);
-            if(curElement.checked) {
-                console.log(curElement + " is checked!");
-
-                $rootScope.curParameters.push(param.id);
-            } else {
-                console.log(curElement + " is not checked.");
-            }
-        });
-
-        $rootScope.curParameters.forEach(function(param) {
-            console.log("curParameters includes " + param);
-        });
-
-        $rootScope.$broadcast("parameters-ready");
+        } // $scope.parameters != undefined
     } // clicked
 }); // FilterController
 
