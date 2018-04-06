@@ -198,7 +198,7 @@ var infowindow = new google.maps.InfoWindow();
 
     function updateHeatmap() {
         var gradient = [
-          "rgba(255, 155, 47, 0)",
+          "rgb(0, 0, 0)",
           "rgb(255, 155, 47)",
           "rgb(247, 143, 55)",
           "rgb(238, 130, 63)",
