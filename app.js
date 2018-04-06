@@ -186,9 +186,9 @@ var infowindow = new google.maps.InfoWindow();
     // map-ready => parameters-ready => data-ready:
     $scope.$on("data-ready", function(event) {
       updateMarkers();
-//      if($rootScope.curParameters.length == 1) {
+      if($rootScope.curParameters.length == 1) {
           updateHeatmap();
-//      }
+      }
     });
 
     //MARKERS END
@@ -198,7 +198,7 @@ var infowindow = new google.maps.InfoWindow();
 
     function updateHeatmap() {
         var gradient = [
-          "rgb(0, 0, 0)",
+          "rgba(255, 155, 47, 0)",
           "rgb(255, 155, 47)",
           "rgb(247, 143, 55)",
           "rgb(238, 130, 63)",
@@ -212,6 +212,8 @@ var infowindow = new google.maps.InfoWindow();
           "rgb(171, 31, 129)",
           "rgb(150, 0, 150)"
       ];
+
+// TODO draw a legend for this
 
         angular.forEach($rootScope.measurements, function(value, key) {
             heatmapData[key] = new google.maps.LatLng(value.coordinates.latitude, value.coordinates.longitude);
@@ -265,7 +267,6 @@ app.controller("FilterController", function($rootScope, $scope, $http, $document
             }, function (response) {
                 console.log("Caught an http error while trying to load parameters; response = " + response);
             });
-//        }); // map-ready
     } // if / listen for tilesloaded
 
     // Filter Parameters waits for Map, Table waits for Filter Parameters:
@@ -291,7 +292,7 @@ app.controller("FilterController", function($rootScope, $scope, $http, $document
 
             $rootScope.$broadcast("parameters-ready");
         } // $rootScope.parameters != undefined
-    } // clicked
+    } // updateParameters
 }); // FilterController
 
 
@@ -307,33 +308,18 @@ app.controller("TableController", function($rootScope, $scope, $http) {
             var parameterString = "parameter[]=";
 
             $rootScope.curParameters.forEach(function(param, key){
-                    //parameterString = parameterString + param + "&parameter=";
-                    parameterString = parameterString + param + ",";
+                    parameterString = parameterString + param + "&parameter=";
+                    //parameterString = parameterString + param + ",";
             });
-            //parameterString = parameterString.substring(0, (parameterString.length - 11));
-            parameterString = parameterString.substring(0, (parameterString.length - 1));
+            parameterString = parameterString.substring(0, (parameterString.length - 11));
+            //parameterString = parameterString.substring(0, (parameterString.length - 1));
 
             if($rootScope.bounds != undefined) {
                 console.log("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000));
-//                $http.get("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000))
-//                .then(function (response) {
+                $http.get("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000))
+                .then(function (response) {
 
-/*
-                    var client = new XMLHttpRequest();
-                    client.open('GET', './measurements.json');
-                    client.onreadystatechange = function() {
-                        //alert(client.responseText);
-*/
-//                    $rootScope.measurements   = response.data.results;
-                    $rootScope.measurements   = [
-                        {"location":"Maharashtra Pollution Control Board - Solapur","parameter":"no2","date":{"utc":"2018-06-02T03:30:00.000Z","local":"2018-06-02T09:00:00+05:30"},"value":43.62,"unit":"µg/m³","coordinates":{"latitude":17.6599188,"longitude":75.9063906},"country":"IN","city":"Solapur"},
-                        {"location":"Maharashtra Pollution Control Board - Solapur","parameter":"co","date":{"utc":"2018-06-02T03:30:00.000Z","local":"2018-06-02T09:00:00+05:30"},"value":2540,"unit":"µg/m³","coordinates":{"latitude":17.6599188,"longitude":75.9063906},"country":"IN","city":"Solapur"},
-                        {"location":"Maharashtra Pollution Control Board - Solapur","parameter":"so2","date":{"utc":"2018-06-02T03:30:00.000Z","local":"2018-06-02T09:00:00+05:30"},"value":17.3,"unit":"µg/m³","coordinates":{"latitude":17.6599188,"longitude":75.9063906},"country":"IN","city":"Solapur"},
-                        {"location":"Maharashtra Pollution Control Board - Solapur","parameter":"o3","date":{"utc":"2018-06-02T03:30:00.000Z","local":"2018-06-02T09:00:00+05:30"},"value":70.94,"unit":"µg/m³","coordinates":{"latitude":17.6599188,"longitude":75.9063906},"country":"IN","city":"Solapur"},
-                        {"location":"Maharashtra Pollution Control Board - Solapur","parameter":"pm25","date":{"utc":"2018-06-02T03:30:00.000Z","local":"2018-06-02T09:00:00+05:30"},"value":92.29,"unit":"µg/m³","coordinates":{"latitude":17.6599188,"longitude":75.9063906},"country":"IN","city":"Solapur"},
-                        {"location":"Maharashtra Pollution Control Board - Solapur","parameter":"pm10","date":{"utc":"2018-06-02T03:30:00.000Z","local":"2018-06-02T09:00:00+05:30"},"value":244.23,"unit":"µg/m³","coordinates":{"latitude":17.6599188,"longitude":75.9063906},"country":"IN","city":"Solapur"},
-                        {"location":"Maharashtra Pollution Control Board - Solapur","parameter":"so2","date":{"utc":"2018-06-01T23:30:00.000Z","local":"2018-06-02T05:00:00+05:30"},"value":18.5,"unit":"µg/m³","coordinates":{"latitude":17.6599188,"longitude":75.9063906},"country":"IN","city":"Solapur"}
-                    ];
+                    $rootScope.measurements   = response.data.results;
 
                     $rootScope.measurements.forEach(function(measurement, key) {
                         ///console.log( key + ": measurement.parameter = " + measurement.parameter + "; measurement.value = " + measurement.value + "; $rootScope.sliderVals[measurement.parameter] = " + $rootScope.sliderVals[measurement.parameter]);
@@ -347,11 +333,9 @@ app.controller("TableController", function($rootScope, $scope, $http) {
 
                     //notify MapController to update markers and heatmap
                     $rootScope.$broadcast("data-ready");
-//                }
-//                client.send();
-//                }, function (response) {
-//                    console.log("Caught an http error while filling the table; response = " + response);
-//                });
+                }, function (response) {
+                    console.log("Caught an http error while filling the table; response = " + response);
+                });
             } else {
                 console.log("TableController.on parameters-ready: map bounds are undefined; did not load table data.");
             }
