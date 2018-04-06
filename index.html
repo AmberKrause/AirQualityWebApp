@@ -41,9 +41,9 @@
 			<span id="filter">
 				<p class="bold">Filter Controls:</p>
 				<p id="floatRight">Only show data for selected parameters with measurements above:</p>
-					<div ng-controller="FilterController" ng-init="initParams" class="filterParamContainer">
+					<div ng-controller="FilterController" class="filterParamContainer">
 						<div ng-repeat="(key, i) in parameters" class={{i}}>
-							<input id={{i}} name={{i}} type="checkbox" > {{ i }}
+							<input id={{i}} name={{i}} type="checkbox" checked> {{ i }}
 							<span id={{i+"text"}} class="text"> {{ sliderVals[i] | number : 3 }}</span>
 							<input id={{i+"slider"}} type="range" min="0" max={{maxSliderVals[i]}} step="any" value="0" class="slider" ng-model="sliderVals[i]">
 						</div>
