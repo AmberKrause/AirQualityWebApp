@@ -303,11 +303,14 @@ app.controller("TableController", function($rootScope, $scope, $http) {
             // but longitude will be steady.
             // 1 degree longitude = 111 km
 
-            var parameterString = "parameter=";
+            var parameterString = "parameter[]=";
+
             $rootScope.curParameters.forEach(function(param, key){
-                    parameterString = parameterString + param + "&parameter=";
+                    //parameterString = parameterString + param + "&parameter=";
+                    parameterString = parameterString + param + ",";
             });
-            parameterString = parameterString.substring(0, (parameterString.length - 11));
+            //parameterString = parameterString.substring(0, (parameterString.length - 11));
+            parameterString = parameterString.substring(0, (parameterString.length - 1));
 
             if($rootScope.bounds != undefined) {
                 console.log("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000));
