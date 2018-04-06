@@ -3,8 +3,6 @@
 (function() {
   var app = angular.module("app", []);
 
-  console.log("Can I just do something here?");
-
   // JSON object with Air Quality Data;
   // initialized in the TableController function.
 
@@ -145,15 +143,41 @@
       }
 
       //create array of markers
-      var markers = $rootScope.measurements.map(function(measure, i) {
-        var lat = $rootScope.measurements[i].coordinates.latitude;
-        //console.log("TESTING: Latitude for marker:" + lat);
-        var lon = $rootScope.measurements[i].coordinates.longitude;
+/*old way that works for clustering but no info box
+      var markers = aqData.map(function(measure, i) {
+        var lat = aqData[i].coordinates.latitude;
+        var lon = aqData[i].coordinates.longitude;
         return new google.maps.Marker({
           position: new google.maps.LatLng(lat,lon),
           label: labels[i % labels.length]
         });
       });
+*/
+
+/*new way including info box*/
+var infowindow = new google.maps.InfoWindow();
+      var markers = $rootScope.measurements.map(function(measure, i) {
+        var lat = $rootScope.measurements[i].coordinates.latitude;
+        var lon = $rootScope.measurements[i].coordinates.longitude;
+        var marker = new google.maps.Marker({
+          position: new google.maps.LatLng(lat,lon),
+          label: labels[i % labels.length]
+        });
+        marker.addListener('mouseover', function() {
+          infowindow.setContent($rootScope.measurements[i].parameter + ": " + $rootScope.measurements[i].value + $rootScope.measurements[i].unit);
+          infowindow.open(map, marker);
+          console.log("opened info box");
+        });
+        marker.addListener('mouseout', function() {
+          infowindow.close();
+          console.log("closed info box");
+        });
+        return marker;
+      });
+/*new way including info box*/
+
+
+
 
       //add marker clusterer to manage the markers
       markerCluster = new MarkerClusterer(map, markers, {imagePath: "images/m"});
@@ -225,6 +249,7 @@ app.controller("TableController", function($rootScope, $scope, $http) {
 
 app.controller("FilterController", function($rootScope, $scope, $http, $document) {
     $rootScope.curParameters   = [];
+
 
     // Just gets the parameters the first time (they are constants):
     if($scope.parameters === undefined) {
