@@ -186,9 +186,9 @@ var infowindow = new google.maps.InfoWindow();
     // map-ready => parameters-ready => data-ready:
     $scope.$on("data-ready", function(event) {
       updateMarkers();
-      if($rootScope.curParameters.length == 1) {
+//      if($rootScope.curParameters.length == 1) {
           updateHeatmap();
-      }
+//      }
     });
 
     //MARKERS END
@@ -227,52 +227,6 @@ var infowindow = new google.maps.InfoWindow();
     // HEATMAP END
 
 }); // MapController
-
-
-// https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000
-app.controller("TableController", function($rootScope, $scope, $http) {
-
-    // Filter Parameters wait for Map, Table waits for Filter Parameters:
-    $scope.$on("parameters-ready", function(event) {
-            // The latitude span changes depending on distance from the equator,
-            // but longitude will be steady.
-            // 1 degree longitude = 111 km
-
-            var parameterString = "parameter=";
-            $rootScope.curParameters.forEach(function(param, key){
-                    parameterString = parameterString + param + "&parameter=";
-            });
-            parameterString = parameterString.substring(0, (parameterString.length - 11));
-
-            if($rootScope.bounds != undefined) {
-                console.log("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000));
-                $http.get("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000))
-                .then(function (response) {
-                    $rootScope.measurements   = response.data.results;
-
-                    console.log("    ---- Still checking parameters for slider compare? Checking pm10 against " + $rootScope.sliderVals.pm10);
-
-                    $rootScope.measurements.forEach(function(measurement, key) {
-                        ///console.log( key + ": measurement.parameter = " + measurement.parameter + "; measurement.value = " + measurement.value + "; $rootScope.sliderVals[measurement.parameter] = " + $rootScope.sliderVals[measurement.parameter]);
-                        if(measurement.value < $rootScope.sliderVals[measurement.parameter]) {
-                            //console.log("About to remove " + measurement.parameter + " with measure " + measurement.value);
-                            $rootScope.measurements.splice(key, 1);
-                        } /*else {
-                            console.log("Keeping in " + measurement.parameter + " with measure " + measurement.value);
-                        }*/
-                    });
-
-                    //notify MapController to update markers and heatmap
-                    $rootScope.$broadcast("data-ready");
-                }, function (response) {
-                    console.log("Caught an http error while filling the table; response = " + response);
-                });
-            } else {
-                console.log("TableController.on parameters-ready: map bounds are undefined; did not load table data.");
-            }
-    }); // parameters ready
-
-}); // TableController
 
 app.controller("FilterController", function($rootScope, $scope, $http, $document) {
     $rootScope.curParameters    = [];
@@ -338,5 +292,51 @@ app.controller("FilterController", function($rootScope, $scope, $http, $document
         } // $rootScope.parameters != undefined
     } // clicked
 }); // FilterController
+
+
+// https://api.openaq.org/v1/measurements?coordinates=18.65,76.90&radius=500000
+app.controller("TableController", function($rootScope, $scope, $http) {
+
+    // Filter Parameters wait for Map, Table waits for Filter Parameters:
+    $scope.$on("parameters-ready", function(event) {
+            // The latitude span changes depending on distance from the equator,
+            // but longitude will be steady.
+            // 1 degree longitude = 111 km
+
+            var parameterString = "parameter=";
+            $rootScope.curParameters.forEach(function(param, key){
+                    parameterString = parameterString + param + "&parameter=";
+            });
+            parameterString = parameterString.substring(0, (parameterString.length - 11));
+
+            if($rootScope.bounds != undefined) {
+                console.log("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000));
+                $http.get("https://api.openaq.org/v1/measurements?" + parameterString + "&coordinates=" + $rootScope.latLng.toUrlValue() + "&radius=" + (($rootScope.bounds.toSpan().lng() / 2) * 111000))
+                .then(function (response) {
+                    $rootScope.measurements   = response.data.results;
+
+                    console.log("    ---- Still checking parameters for slider compare? Checking pm10 against " + $rootScope.sliderVals.pm10);
+
+                    $rootScope.measurements.forEach(function(measurement, key) {
+                        ///console.log( key + ": measurement.parameter = " + measurement.parameter + "; measurement.value = " + measurement.value + "; $rootScope.sliderVals[measurement.parameter] = " + $rootScope.sliderVals[measurement.parameter]);
+                        if(measurement.value < $rootScope.sliderVals[measurement.parameter]) {
+                            //console.log("About to remove " + measurement.parameter + " with measure " + measurement.value);
+                            $rootScope.measurements.splice(key, 1);
+                        } /*else {
+                            console.log("Keeping in " + measurement.parameter + " with measure " + measurement.value);
+                        }*/
+                    });
+
+                    //notify MapController to update markers and heatmap
+                    $rootScope.$broadcast("data-ready");
+                }, function (response) {
+                    console.log("Caught an http error while filling the table; response = " + response);
+                });
+            } else {
+                console.log("TableController.on parameters-ready: map bounds are undefined; did not load table data.");
+            }
+    }); // parameters ready
+
+}); // TableController
 
 })();
